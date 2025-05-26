@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import LoanChart from './LoanChart';
+import { generateAIReport } from '../services/ApiCalls';
 
 export default function LoanCalculatorMain() {
     const [activeTab, setActiveTab] = useState("calculator");
-    const [assetType, setAssetType] = useState('House Loan');
+    const [assetType, setAssetType] = useState('house_loan');
     const [principal, setPrincipal] = useState(0);
     const [tenure, setTenure] = useState(12);
     const [downPayment, setDownPayment] = useState(0);
@@ -23,6 +24,10 @@ export default function LoanCalculatorMain() {
     const [penalties, setPenalties] = useState([
         { installmentNo: 0, daysLate: 0, ratePercent: 0, applyOn: 'amount' } // or 'amountWithInterest'
     ]);
+
+    const [aiReport, setAIReport] = useState("");
+    const [loadingAI, setLoadingAI] = useState(false);
+
 
     const getAnnualRate = (months) => {
         if (!applyInterest) return 0;
@@ -193,7 +198,7 @@ export default function LoanCalculatorMain() {
 
     const handlePenaltyChange = (idx, field, value) => {
         const updated = [...penalties];
-    
+
         if (field === 'ratePercent' || field === 'daysLate') {
             updated[idx][field] = parseFloat(value);
         } else if (field === 'installmentNo') {
@@ -202,9 +207,22 @@ export default function LoanCalculatorMain() {
             // for 'applyOn' or any string field
             updated[idx][field] = value;
         }
-    
+
         setPenalties(updated);
     };
+
+
+    useEffect(() => {
+        if (activeTab === "ai" && schedule.length > 0 && aiReport === "") {
+
+            setLoadingAI(true);
+            generateAIReport(schedule).then(report => {
+
+                setAIReport(report);
+                setLoadingAI(false);
+            });
+        }
+    }, [activeTab]);
 
 
 
@@ -248,10 +266,10 @@ export default function LoanCalculatorMain() {
                                         <div className="col-md-4">
                                             <label htmlFor="assetType" className="form-label text-sm font-medium text-gray-700 d-block text-start fw-medium mb-1">Asset Type</label>
                                             <select id="assetType" className="form-select select-field" value={assetType} onChange={e => setAssetType(e.target.value)}>
-                                                <option>House Loan</option>
-                                                <option>Car Loan</option>
-                                                <option>Personal Loan</option>
-                                                <option>Equipment Finance</option>
+                                                <option value="house_loan">House Loan</option>
+                                                <option value="car_loan">Car Loan</option>
+                                                <option value="personal_loan">Personal Loan</option>
+                                                <option value="equipment_finance">Equipment Finance</option>
                                             </select>
                                         </div>
                                         <div className="col-md-4">
@@ -519,12 +537,33 @@ export default function LoanCalculatorMain() {
                         <div className="card-body p-6">
                             <div className="row g-4 text-center mb-5">
                                 <div className="col-lg-12">
-                                <div className="text-black p-3 text-xl font-semibold">Coming soon</div>
+                                    {/* {loadingAI ? (
+                                        <div className="text-center p-4">Generating AI report...</div>
+                                    ) : (
+                                        <div className="bg-light text-dark p-4 rounded shadow-sm">
+                                            <h5 className="mb-3">AI Generated Financial Summary:</h5>
+                                            <pre className="text-start" style={{ whiteSpace: 'pre-wrap' }}>
+                                                {aiReport}
+                                            </pre>
+                                        </div>
+                                    )} */}
+
+                                    {/* comment below one and uncomment above one once implement Actual Open AI */}
+                                    <div className="bg-light text-dark p-4 rounded shadow-sm">
+                                        <h5 className="mb-3">AI Generated Financial Summary:</h5>
+                                        <pre className="text-start" style={{ whiteSpace: 'pre-wrap' }} >
+                                            {aiReport}
+                                        </pre>
                                     </div>
+
+
+
+
+                                </div>
                             </div>
 
 
-                         
+
 
                         </div>
                     </div>
