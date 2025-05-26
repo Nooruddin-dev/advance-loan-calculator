@@ -193,10 +193,18 @@ export default function LoanCalculatorMain() {
 
     const handlePenaltyChange = (idx, field, value) => {
         const updated = [...penalties];
-        updated[idx][field] = field === 'ratePercent' || field === 'daysLate' ? parseFloat(value) : parseInt(value);
+    
+        if (field === 'ratePercent' || field === 'daysLate') {
+            updated[idx][field] = parseFloat(value);
+        } else if (field === 'installmentNo') {
+            updated[idx][field] = parseInt(value);
+        } else {
+            // for 'applyOn' or any string field
+            updated[idx][field] = value;
+        }
+    
         setPenalties(updated);
     };
-
 
 
 
@@ -410,7 +418,7 @@ export default function LoanCalculatorMain() {
 
                         {schedule.length > 0 && (
                             <div className="card mt-5 rounded-xl shadow-lg overflow-hidden">
-                                <div className="card-header-dark text-white p-3 text-xl font-semibold">Repayment Schedule</div>
+                                <div className="card-header-dark text-white p-3 text-xl font-semibold rounded">Repayment Schedule</div>
                                 <div className="card-body p-6 table-responsive">
                                     <table className="table table-bordered table-striped text-left">
                                         <thead className="bg-gray-100">
